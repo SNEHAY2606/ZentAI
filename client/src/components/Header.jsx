@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { assets } from "../assets/assets"
 import { motion } from "motion/react"
 import { AppContext } from "../context/AppContext"
@@ -15,6 +15,13 @@ const SAMPLE_PROMPTS = [
 const Header = () => {
   const { user, setshowLogin } = useContext(AppContext)
   const navigate = useNavigate()
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   const onClickHandler = () => {
     if (user) navigate('/result')
@@ -25,7 +32,7 @@ const Header = () => {
     <div style={{
       minHeight: '90vh',
       display: 'flex',
-      flexDirection: 'row',
+      flexDirection: isMobile ? 'column' : 'row',
       position: 'relative',
       overflow: 'hidden',
       background: '#0d0d0d',
@@ -33,14 +40,31 @@ const Header = () => {
       <style>{`
         .prompt-chip:hover { border-color: #7c3aed !important; color: #a78bfa !important; }
         .cta-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
+
+      {/* ── Hero image on mobile (top) ── */}
+      {isMobile && (
+        <div style={{ position: 'relative', height: 280, overflow: 'hidden', flexShrink: 0 }}>
+          <img src={heroPlaceholder} alt="AI visual"
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top',
+              opacity: 0.85,
+            }}
+          />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to bottom, transparent 40%, #0d0d0d 100%)',
+          }} />
+        </div>
+      )}
 
       {/* ── LEFT — Text content ── */}
       <div style={{
         flex: 1,
         display: 'flex', flexDirection: 'column',
         justifyContent: 'center',
-        padding: '60px 56px',
+        padding: isMobile ? '32px 24px 48px' : '60px 56px',
         zIndex: 2, position: 'relative',
       }}>
 
@@ -54,7 +78,7 @@ const Header = () => {
             background: '#1a1133', border: '1px solid #2d1b69',
             borderRadius: 999, padding: '6px 16px',
             fontSize: 12, color: '#a78bfa', fontWeight: 500,
-            marginBottom: 28, width: 'fit-content',
+            marginBottom: 24, width: 'fit-content',
           }}
         >
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#a78bfa', display: 'inline-block', animation: 'pulse 2s infinite' }} />
@@ -67,12 +91,12 @@ const Header = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           style={{
-            fontSize: 'clamp(36px, 4vw, 62px)',
+            fontSize: isMobile ? 'clamp(32px, 8vw, 48px)' : 'clamp(36px, 4vw, 62px)',
             fontWeight: 800,
             letterSpacing: '-2px',
             lineHeight: 1.1,
             color: '#f9fafb',
-            marginBottom: 20,
+            marginBottom: 16,
           }}
         >
           Turn your words into{' '}
@@ -91,8 +115,8 @@ const Header = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{
-            fontSize: 16, color: '#6b7280',
-            maxWidth: 460, lineHeight: 1.7, marginBottom: 36,
+            fontSize: isMobile ? 14 : 16, color: '#6b7280',
+            maxWidth: 460, lineHeight: 1.7, marginBottom: 28,
           }}
         >
           Describe any image in plain English. Our AI instantly generates high-quality artwork, illustrations, and photos — in seconds.
@@ -110,8 +134,11 @@ const Header = () => {
             display: 'inline-flex', alignItems: 'center', gap: 10,
             background: 'linear-gradient(135deg, #6366f1, #a855f7)',
             color: '#fff', border: 'none', borderRadius: 999,
-            padding: '14px 36px', fontSize: 15, fontWeight: 600,
-            cursor: 'pointer', marginBottom: 48, width: 'fit-content',
+            padding: isMobile ? '12px 28px' : '14px 36px',
+            fontSize: isMobile ? 14 : 15, fontWeight: 600,
+            cursor: 'pointer', marginBottom: 36,
+            width: isMobile ? '100%' : 'fit-content',
+            justifyContent: isMobile ? 'center' : 'flex-start',
             boxShadow: '0 4px 24px rgba(99,102,241,0.4)',
             transition: 'all 0.2s',
           }}
@@ -147,78 +174,70 @@ const Header = () => {
           ))}
         </motion.div>
 
-        {/* Sample images */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          style={{ display: 'flex', gap: 10, marginTop: 44, flexWrap: 'wrap' }}
-        >
-          {[...Array(5)].map((_, i) => (
-            <motion.img
-              key={i}
-              whileHover={{ scale: 1.1, y: -4 }}
-              transition={{ duration: 0.2 }}
-              src={i % 2 === 0 ? assets.sample_img_1 : assets.sample_img_2}
-              alt="sample"
-              onClick={onClickHandler}
-              style={{
-                width: 64, height: 64, borderRadius: 12,
-                objectFit: 'cover', cursor: 'pointer',
-                border: '1.5px solid #1f1f1f',
-                filter: 'brightness(0.85)',
-                transition: 'filter 0.2s',
-              }}
-            />
-          ))}
-          <div style={{
-            width: 64, height: 64, borderRadius: 12,
-            border: '1px dashed #2a2a2a',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#4b5563', fontSize: 11,
-          }}
-            onClick={onClickHandler}
+        {/* Sample images — hide on mobile to save space */}
+        {!isMobile && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            style={{ display: 'flex', gap: 10, marginTop: 44, flexWrap: 'wrap' }}
           >
-            + more
-          </div>
-        </motion.div>
+            {[...Array(5)].map((_, i) => (
+              <motion.img
+                key={i}
+                whileHover={{ scale: 1.1, y: -4 }}
+                transition={{ duration: 0.2 }}
+                src={i % 2 === 0 ? assets.sample_img_1 : assets.sample_img_2}
+                alt="sample"
+                onClick={onClickHandler}
+                style={{
+                  width: 64, height: 64, borderRadius: 12,
+                  objectFit: 'cover', cursor: 'pointer',
+                  border: '1.5px solid #1f1f1f',
+                  filter: 'brightness(0.85)',
+                }}
+              />
+            ))}
+            <div style={{
+              width: 64, height: 64, borderRadius: 12,
+              border: '1px dashed #2a2a2a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: '#4b5563', fontSize: 11,
+            }} onClick={onClickHandler}>
+              + more
+            </div>
+          </motion.div>
+        )}
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
-          style={{ marginTop: 12, fontSize: 11, color: '#374151' }}
+          style={{ marginTop: 16, fontSize: 11, color: '#374151' }}
         >
           Sample images generated with Zent.ai
         </motion.p>
       </div>
 
-      {/* ── RIGHT — Robot hand image ── */}
-      <div style={{
-        flex: '0 0 45%',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <img
-          src={heroPlaceholder}
-          alt="AI visual"
-          style={{
-            width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center',
-            maskImage: 'linear-gradient(to right, transparent 0%, black 30%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 30%)',
-            opacity: 0.9,
-          }}
-        />
-        {/* Bottom fade */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
-          background: 'linear-gradient(to top, #0d0d0d, transparent)',
-          pointerEvents: 'none',
-        }} />
-      </div>
-
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+      {/* ── RIGHT — Robot hand image (desktop only) ── */}
+      {!isMobile && (
+        <div style={{ flex: '0 0 45%', position: 'relative', overflow: 'hidden' }}>
+          <img src={heroPlaceholder} alt="AI visual"
+            style={{
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center',
+              maskImage: 'linear-gradient(to right, transparent 0%, black 30%)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 30%)',
+              opacity: 0.9,
+            }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
+            background: 'linear-gradient(to top, #0d0d0d, transparent)',
+            pointerEvents: 'none',
+          }} />
+        </div>
+      )}
     </div>
   )
 }
