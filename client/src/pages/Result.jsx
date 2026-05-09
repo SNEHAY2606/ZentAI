@@ -18,7 +18,7 @@ const STYLE_PRESETS = [
 
 const Result = () => {
   const { generateImage, backendUrl, token } = useContext(AppContext)
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768)
